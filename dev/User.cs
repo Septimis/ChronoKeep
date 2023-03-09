@@ -4,9 +4,9 @@ using System.Text.RegularExpressions;
 
 class User {
     private int Id;
-    public string? name { get; set; }
-    private long? millisecondsTotal { get; set; } = 0;
-    private string email;
+    public string name { get; set; } = "empty";
+    public long millisecondsTotal { get; set; } = 0;
+    private string email = "empty";
     public string Email {
         get => this.email ?? "No email exists...";
         set {
@@ -16,12 +16,15 @@ class User {
             this.email = value;
         }
     }
-    private string password = "password123";
+    private string password = "empty";
     public string Password {
         get { return this.password; }
         set { this.password = hashPassword(value); } 
     }
+    public void setPreHashedPassword(string a_hashedPassword) { this.password = a_hashedPassword; }
 
+    public User() { /* Empty on purpose */ }
+    
     //brand new user Constructor
     public User(string a_name, string a_email, string a_plainTextPassword) {
         this.name = a_name;
