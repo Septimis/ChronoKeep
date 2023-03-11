@@ -4,7 +4,7 @@ class UserController {
     private User loggedInUser = new User();
     public User getUser => this.loggedInUser;
     
-    public void queryUser(string a_email, string a_plainTextPassword) {
+    public bool queryUser(string a_email, string a_plainTextPassword) {
         try {
             using(SqlConnection connection = new SqlConnection()) {
                 connection.ConnectionString = "Server=.\\SQLExpress;Database=ChronoKeep;Trusted_Connection=true";
@@ -15,10 +15,8 @@ class UserController {
 
                     using(SqlDataReader queryReader = queryCmd.ExecuteReader()) {
                         queryReader.Read();
-                        if(this.loggedInUser.hashPassword(a_plainTextPassword) != queryReader["password"].ToString()) {
-                            System.Console.WriteLine("\n!!! Password did not match !!!\n");
-                            return;
-                        }
+                        if(this.loggedInUser.hashPassword(a_plainTextPassword) != queryReader["password"].ToString())
+                            return false;
 
                         this.loggedInUser.name = queryReader["name"].ToString() ?? "empty";
                         this.loggedInUser.millisecondsTotal = long.Parse(queryReader["millisecondsTotal"].ToString() ?? "0");
@@ -29,8 +27,11 @@ class UserController {
             }
         } catch(SqlException e) {
             System.Console.WriteLine($"There was a Database error:\n{e.Message}");
-            return;
+            return false;
+        } catch(System.Exception) {
+            return false;
         }
+        return true;
     }
 
     public void deleteUser(string a_email, string a_plainTextPassword) {
@@ -76,16 +77,17 @@ class UserController {
         this.loggedInUser = a_newUser;
     }
 
-    public void modifyUser(User a_modifiedUser) {
+    public void modifyUser(string a_name, long a_millisecondsTotal, string a_email, string a_hashedPassword) {
         try {
             using(SqlConnection connection = new SqlConnection("Server=.\\SQLExpress;Database=ChronoKeep;Trusted_Connection=true")) {
                 connection.Open();
 
-                using(SqlCommand modifyCmd = new SqlCommand("UPDATE ChronoUser SET name = '@a_name', millisecondsTotal = '@a_msTot', email = '@a_email', password = '@a_password' WHERE email = '@a_email'", connection)) {
-                    modifyCmd.Parameters.AddWithValue("@a_name", a_modifiedUser.name);
-                    modifyCmd.Parameters.AddWithValue("@a_msTot", a_modifiedUser.millisecondsTotal);
-                    modifyCmd.Parameters.AddWithValue("@a_email", a_modifiedUser.Email);
-                    modifyCmd.Parameters.AddWithValue("@a_password", a_modifiedUser.Password);
+                using(SqlCommand modifyCmd = new SqlCommand("UPDATE ChronoUser SET name = @0, millisecondsTotal = @1, email = @2, password = @3 WHERE email = @4", connection)) {
+                    modifyCmd.Parameters.AddWithValue("@0", a_name);
+                    modifyCmd.Parameters.AddWithValue("@1", a_millisecondsTotal);
+                    modifyCmd.Parameters.AddWithValue("@2", a_email);
+                    modifyCmd.Parameters.AddWithValue("@3", a_hashedPassword);
+                    modifyCmd.Parameters.AddWithValue("@4", this.loggedInUser.Email);
                     modifyCmd.ExecuteNonQuery();
                 }
             }
@@ -93,6 +95,9 @@ class UserController {
             System.Console.WriteLine($"There was a Database error:\n{e.Message}");
             return;
         }
-        this.loggedInUser = a_modifiedUser;
+        this.loggedInUser.name = a_name;
+        this.loggedInUser.millisecondsTotal = a_millisecondsTotal;
+        this.loggedInUser.Email = a_email;
+        this.loggedInUser.setPreHashedPassword(a_hashedPassword);
     }
 }

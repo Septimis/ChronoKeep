@@ -8,7 +8,7 @@ class User {
     public long millisecondsTotal { get; set; } = 0;
     private string email = "empty";
     public string Email {
-        get => this.email ?? "No email exists...";
+        get => this.email.Equals("empty") ? "No email exists..." : this.email;
         set {
             //validate email
             Regex emailRegex = new Regex("^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$");
