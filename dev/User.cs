@@ -1,11 +1,11 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 class User {
-    private int Id;
+    public int Id { get; set; } = 0;
     public string name { get; set; } = "empty";
-    public long millisecondsTotal { get; set; } = 0;
     private string email = "empty";
     public string Email {
         get => this.email.Equals("empty") ? "No email exists..." : this.email;
@@ -16,6 +16,7 @@ class User {
             this.email = value;
         }
     }
+    public List<Project> projects { get; set; }
     private string password = "empty";
     public string Password {
         get { return this.password; }
@@ -24,18 +25,10 @@ class User {
     public void setPreHashedPassword(string a_hashedPassword) { this.password = a_hashedPassword; }
 
     public User() { /* Empty on purpose */ }
-    
-    //brand new user Constructor
-    public User(string a_name, string a_email, string a_plainTextPassword) {
-        this.name = a_name;
-        this.Email = a_email;
-        this.Password = a_plainTextPassword;
-    }
 
     //Initialized user Constructor
-    public User(string a_name, long a_millisecondsTotal, string a_email, string a_plainTextPassword) {
+    public User(string a_name, string a_email, string a_plainTextPassword) {
         this.name = a_name;
-        this.millisecondsTotal = a_millisecondsTotal;
         this.Email = a_email;
         this.Password = a_plainTextPassword;
     }
@@ -47,6 +40,6 @@ class User {
     }
 
     public override string ToString() {
-        return $"Name: {this.name ?? "[empty]"}\nemail: {this.email}\nHashed Password: {this.Password}";
+        return $"Name: {this.name ?? "[empty]"}\nemail: {this.email}\n";
     }
 }

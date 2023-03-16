@@ -76,8 +76,6 @@ if(email.ToLower().Equals("new")) {
 Console.Clear();
 Console.WriteLine($"-- You've been authenticated {uc.getUser.name.Trim()} --");
 
-
-
 while(true) {
     Console.WriteLine("MAIN MENU\n---------------------------------------");
     Console.WriteLine("\nPlease type the corresponding number of what you'd like to do:");
@@ -88,8 +86,74 @@ while(true) {
     Console.Write("Selection: ");
     string menuChoice = Console.ReadLine() ?? "";
 
-    if(menuChoice.Equals("1")) {
+    if(menuChoice.Equals("1")) { //PROJECTS
+        Console.Clear();
+        while(true) {
+            Console.WriteLine("MAIN MENU -> PROJECTS\n---------------------------------------");
+        
+            int projectIndex = 0;
+            foreach(Project p in uc.getUser.projects) {
+                Console.WriteLine($"\t{projectIndex + 1}) {p.title}\t\t{p.getTime()}");
+                projectIndex++;
+            }
+            Console.WriteLine($"\n\t{projectIndex + 1}) Create New Project");
+            Console.WriteLine($"\t{projectIndex + 2}) Back to Main Menu");
 
+            Console.Write("Selection: ");
+            menuChoice = Console.ReadLine() ?? "";
+
+            if(int.Parse(menuChoice) - 1 < uc.getUser.projects.Count) {
+                Console.WriteLine("Referenced Project:\n\n" + uc.getUser.projects[int.Parse(menuChoice) - 1].ToString() + "\n");
+            } else if(int.Parse(menuChoice) == projectIndex + 1) { //CREATE NEW PROJECT
+                Console.Clear();
+                while(true) {
+                    Console.WriteLine("MAIN MENU -> PROJECTS -> CREATE NEW PROJECT\n---------------------------------------");
+                    Console.Write("Project Title: ");
+                    string projTitle = Console.ReadLine() ?? "";
+                    if(projTitle == "") {
+                        printError("Title cannot be blank!");
+                        continue;
+                    }
+                    
+                    //check if title is already in use
+                    bool isTitleCopied = false;
+                    foreach(Project p in uc.getUser.projects) {
+                        if(p.title == projTitle) {
+                            printError($"{projTitle} is already being used.  Pick another name!");
+                            isTitleCopied = true;
+                            break;
+                        }
+                    }
+                    if(isTitleCopied) continue;
+
+                    if(projTitle.Length >= 50) {
+                        printError("Your title cannot be greater than 50 characters...");
+                        continue;
+                    }
+                    
+                    Console.Write("Project Discription (250 char): ");
+                    string projDescription = Console.ReadLine() ?? "";
+                    if(projDescription.Length >= 250) {
+                        printError("Your description cannot be greater than 250 characters...");
+                        continue;
+                    }
+
+                    Project newProj = new Project(projTitle, projDescription, 0L);
+                    uc.getPC.createProject(newProj, uc.getUser.Id);
+                    uc.getUser.projects.Add(newProj);
+
+                    Console.WriteLine($"{projTitle} created successfully!");
+                    break;
+                }
+            } else if(int.Parse(menuChoice) == projectIndex + 2) {
+                Console.Clear();
+                break;
+            } else {
+                printError($"{menuChoice} wasn't recognized... Enter a corresponding number.");
+            }
+        }
+
+        
     } else if(menuChoice.Equals("2")) { //SETTINGS
         Console.Clear();
 
@@ -116,7 +180,7 @@ while(true) {
                         Console.Write("\tNew Name: ");
                         string newName = Console.ReadLine() ?? "";
                         if (newName.Length < 50 && newName.Length > -1 && newName != null) {
-                            uc.modifyUser(newName, uc.getUser.millisecondsTotal, uc.getUser.Email, uc.getUser.Password);
+                            uc.modifyUser(newName, uc.getUser.Email, uc.getUser.Password);
                             Console.WriteLine($"\nName successfully changed to {uc.getUser.name}!\n");
                         } else {
                             printError($"{newName} was invalid! Be sure name is between 0 and 50 characters...");
@@ -127,7 +191,7 @@ while(true) {
                         string newEmail = Console.ReadLine() ?? "";
                         Regex emailRegex = new Regex("^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$");
                         if(emailRegex.IsMatch(newEmail)) {
-                            uc.modifyUser(uc.getUser.name, uc.getUser.millisecondsTotal, newEmail, uc.getUser.Password);
+                            uc.modifyUser(uc.getUser.name, newEmail, uc.getUser.Password);
                             Console.WriteLine($"\nEmail successfully changed to {uc.getUser.Email}!\n");
                         } else {
                             printError($"{newEmail} was invalid!  Email not changed...");
@@ -141,7 +205,7 @@ while(true) {
                             Console.Write("\nNew Password: ");
                             string newPlainTextPassword = Console.ReadLine() ?? "";
                             if(newPlainTextPassword.Length > 7 && newPlainTextPassword != "password") {
-                                uc.modifyUser(uc.getUser.name, uc.getUser.millisecondsTotal, uc.getUser.Email, uc.getUser.hashPassword(newPlainTextPassword));
+                                uc.modifyUser(uc.getUser.name, uc.getUser.Email, uc.getUser.hashPassword(newPlainTextPassword));
                                 Console.WriteLine("\nPassword successfully changed!");
                             } else {
                                 printError("Your password must be at least 8 charactesr and not be 'password'...");

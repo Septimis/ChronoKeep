@@ -3,6 +3,9 @@ using System.Data.SqlClient;
 class UserController {
     private User loggedInUser = new User();
     public User getUser => this.loggedInUser;
+
+    private ProjectController pc = new ProjectController();
+    public ProjectController getPC => this.pc;
     
     public bool queryUser(string a_email, string a_plainTextPassword) {
         try {
@@ -18,10 +21,11 @@ class UserController {
                         if(this.loggedInUser.hashPassword(a_plainTextPassword) != queryReader["password"].ToString())
                             return false;
 
+                        this.loggedInUser.Id = (int)queryReader["id"];
                         this.loggedInUser.name = queryReader["name"].ToString() ?? "empty";
-                        this.loggedInUser.millisecondsTotal = long.Parse(queryReader["millisecondsTotal"].ToString() ?? "0");
                         this.loggedInUser.Email = queryReader["email"].ToString() ?? "empty";
                         this.loggedInUser.setPreHashedPassword(queryReader["password"].ToString() ?? "empty");
+                        this.loggedInUser.projects = this.pc.getAllUserProjects(this.loggedInUser.Id) ?? new System.Collections.Generic.List<Project>();
                     }
                 }
             }
@@ -62,9 +66,8 @@ class UserController {
                 connection.ConnectionString = "Server=.\\SQLExpress;Database=ChronoKeep;Trusted_Connection=true";
                 connection.Open();
 
-                using(SqlCommand insertCmd = new SqlCommand("INSERT INTO ChronoUser (name, millisecondsTotal, email, password) VALUES (@a_name, @a_msTot, @email, @a_password)", connection)) {
+                using(SqlCommand insertCmd = new SqlCommand("INSERT INTO ChronoUser (name, email, password) VALUES (@a_name, @email, @a_password)", connection)) {
                     insertCmd.Parameters.AddWithValue("@a_name", a_newUser.name);
-                    insertCmd.Parameters.AddWithValue("@a_msTot", 0);
                     insertCmd.Parameters.AddWithValue("@email", a_newUser.Email);
                     insertCmd.Parameters.AddWithValue("@a_password", a_newUser.Password);
                     insertCmd.ExecuteNonQuery();
@@ -77,14 +80,13 @@ class UserController {
         this.loggedInUser = a_newUser;
     }
 
-    public void modifyUser(string a_name, long a_millisecondsTotal, string a_email, string a_hashedPassword) {
+    public void modifyUser(string a_name, string a_email, string a_hashedPassword) {
         try {
             using(SqlConnection connection = new SqlConnection("Server=.\\SQLExpress;Database=ChronoKeep;Trusted_Connection=true")) {
                 connection.Open();
 
-                using(SqlCommand modifyCmd = new SqlCommand("UPDATE ChronoUser SET name = @0, millisecondsTotal = @1, email = @2, password = @3 WHERE email = @4", connection)) {
+                using(SqlCommand modifyCmd = new SqlCommand("UPDATE ChronoUser SET name = @0, email = @2, password = @3 WHERE email = @4", connection)) {
                     modifyCmd.Parameters.AddWithValue("@0", a_name);
-                    modifyCmd.Parameters.AddWithValue("@1", a_millisecondsTotal);
                     modifyCmd.Parameters.AddWithValue("@2", a_email);
                     modifyCmd.Parameters.AddWithValue("@3", a_hashedPassword);
                     modifyCmd.Parameters.AddWithValue("@4", this.loggedInUser.Email);
@@ -96,7 +98,6 @@ class UserController {
             return;
         }
         this.loggedInUser.name = a_name;
-        this.loggedInUser.millisecondsTotal = a_millisecondsTotal;
         this.loggedInUser.Email = a_email;
         this.loggedInUser.setPreHashedPassword(a_hashedPassword);
     }
