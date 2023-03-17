@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 UserController uc = new UserController();
 string email = "";
@@ -102,7 +103,58 @@ while(true) {
             Console.Write("Selection: ");
             menuChoice = Console.ReadLine() ?? "";
 
-            if(int.Parse(menuChoice) - 1 < uc.getUser.projects.Count) {
+            if(int.Parse(menuChoice) - 1 < uc.getUser.projects.Count) { //OPEN PROJECT
+                Console.Clear();
+
+                while(true) {
+                    Console.WriteLine($"MAIN MENU -> PROJECTS -> {uc.getUser.projects[int.Parse(menuChoice) - 1].title.ToUpper()}");
+                    Console.WriteLine(uc.getUser.projects[int.Parse(menuChoice) - 1].description);
+                    Console.WriteLine(uc.getUser.projects[int.Parse(menuChoice) - 1].getTime());
+                    Console.WriteLine("\n\t1) Start Timer");
+                    Console.WriteLine("\n\t2) Back to Projects");
+                    menuChoice = Console.ReadLine() ?? "";
+
+                    if(menuChoice.Equals("1")) {
+                        //count down from 3
+                        for(int i = 3; i > 0; i--) {
+                            Console.Clear();
+                            Console.WriteLine(Figgle.FiggleFonts.Standard.Render(i.ToString()));
+                            System.Threading.Thread.Sleep(1000);
+                        }
+                        Console.Clear();
+
+                        bool isDone = false;
+                        uint elapsedMillis = 0;
+                        
+                        System.Threading.Thread listenForInputThread = new System.Threading.Thread(listenForInput);
+                        listenForInputThread.Start();
+                        uint lastDigit = 10;
+                        DateTime startTime = DateTime.Now;
+                        while(listenForInputThread.IsAlive) {
+                            elapsedMillis = (uint)(DateTime.Now - startTime).TotalMilliseconds;
+                            if(lastDigit != (Math.Floor(elapsedMillis / 1000.0) % 10)) { //optimization to not print to screen every 10th of a second.
+                                lastDigit = (uint)(Math.Floor(elapsedMillis / 1000.0) % 10);
+                                Console.Clear();
+                                Console.WriteLine("Press 's' to stop the timer...\n");
+                                Console.WriteLine($"Total time spent on {uc.getUser.projects[int.Parse(menuChoice) - 1].title}");
+                                Console.WriteLine($"\t{uc.getUser.projects[int.Parse(menuChoice) - 1].getTime(0, elapsedMillis)}\n");
+                                Console.WriteLine("Current Session:");
+                                string currentSession = uc.getUser.projects[int.Parse(menuChoice) - 1].getTime(elapsedMillis, 0);
+                                Console.WriteLine($"({currentSession})");
+                                Console.WriteLine(Figgle.FiggleFonts.Standard.Render(currentSession));
+                            }
+                            System.Threading.Thread.Sleep(100);
+                        }
+
+
+
+                    } else if(menuChoice.Equals("2")) {
+                        Console.Clear();
+                        break;
+                    } else {
+                        printError($"{menuChoice} was not a valid input.  Enter the corresponding number next to each option...");
+                    }
+                }
                 Console.WriteLine("Referenced Project:\n\n" + uc.getUser.projects[int.Parse(menuChoice) - 1].ToString() + "\n");
             } else if(int.Parse(menuChoice) == projectIndex + 1) { //CREATE NEW PROJECT
                 Console.Clear();
@@ -274,4 +326,8 @@ void printError(string errorText) {
     Console.WriteLine("+");
 
     Console.WriteLine("\n");
+}
+
+void listenForInput() {
+    while(Console.ReadKey().Key != ConsoleKey.S);
 }

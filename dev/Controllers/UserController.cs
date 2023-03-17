@@ -48,7 +48,7 @@ class UserController {
             using(SqlConnection connection = new SqlConnection("Server=.\\SQLExpress;Database=ChronoKeep;Trusted_Connection=true")) {
                 connection.Open();
 
-                using(SqlCommand deleteCmd = new SqlCommand("DELETE FROM ChronoUser WHERE email = '@a_email'", connection)) {
+                using(SqlCommand deleteCmd = new SqlCommand("DELETE FROM ChronoUser WHERE email = @a_email", connection)) {
                     deleteCmd.Parameters.AddWithValue("@a_email", this.loggedInUser.Email);
 
                     deleteCmd.ExecuteNonQuery();

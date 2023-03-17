@@ -20,3 +20,4 @@ C:\programming\ChronoKeep\dev\bin\Debug\net7.0\runtimes\win-x86\native\sni.dll
 C:\programming\ChronoKeep\dev\bin\Debug\net7.0\runtimes\unix\lib\netcoreapp2.1\System.Data.SqlClient.dll
 C:\programming\ChronoKeep\dev\bin\Debug\net7.0\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll
 C:\programming\ChronoKeep\dev\obj\Debug\net7.0\dev.csproj.CopyComplete
+C:\programming\ChronoKeep\dev\bin\Debug\net7.0\Figgle.dll

@@ -22,6 +22,23 @@ class ProjectController {
             System.Console.WriteLine($"There was a database issue: {e.Message}");
         }
     }
+    public void deleteProject(string a_projectName, int a_userID) {
+        try {
+            using(SqlConnection connection = new SqlConnection()) {
+                connection.ConnectionString = "Server=.\\SQLExpress;Database=ChronoKeep;Trusted_Connection=true";
+                connection.Open();
+
+                using(SqlCommand deleteCmd = new SqlCommand("DELETE FROM Project WHERE title = @0, userID = @1")) {
+                    deleteCmd.Parameters.AddWithValue("@0", a_projectName);
+                    deleteCmd.Parameters.AddWithValue("@1", a_userID);
+
+                    deleteCmd.ExecuteNonQuery();
+                }
+            }
+        } catch(System.Exception) {
+            System.Console.WriteLine($"There was an issue with deleting {a_projectName}...");
+        }
+    }
     public Project queryProject(string a_title, int a_userID) {
         try {
             using(SqlConnection connection = new SqlConnection()) {
@@ -45,6 +62,26 @@ class ProjectController {
             }
         } catch(System.Exception) {
             return null;
+        }
+    }
+
+    public void modifyProject(string a_title, string a_description, long a_millisecondsTotal, int a_userID) {
+        try {
+            using(SqlConnection connection = new SqlConnection()) {
+                connection.ConnectionString = "Server=.\\SQLExpress;Database=ChronoKeep;Trusted_Connection=true";
+                connection.Open();
+
+                using(SqlCommand modifyCmd = new SqlCommand("UPDATE Project SET title = @0, description = @1, millisecondsTotal = @2 WHERE title = @0, userID = @4", connection)) {
+                    modifyCmd.Parameters.AddWithValue("@0", a_title);
+                    modifyCmd.Parameters.AddWithValue("@1", a_description);
+                    modifyCmd.Parameters.AddWithValue("@2", a_millisecondsTotal);
+                    modifyCmd.Parameters.AddWithValue("@3", a_userID);
+
+                    modifyCmd.ExecuteNonQuery();
+                }
+            }
+        } catch(System.Exception) {
+            System.Console.WriteLine($"Could not modify {a_title}");
         }
     }
 
