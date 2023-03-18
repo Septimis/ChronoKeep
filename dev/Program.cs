@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using System.Diagnostics;
 
 UserController uc = new UserController();
 string email = "";
@@ -31,7 +30,6 @@ if(email.ToLower().Equals("new")) {
         if(!correctInput) printError("Name must be between 0 and 50 characters...");
     } while(!correctInput);
 
-    
     do {
         Console.Write("\temail: ");
         email = Console.ReadLine() ?? "";
@@ -93,10 +91,11 @@ while(true) {
             Console.WriteLine("MAIN MENU -> PROJECTS\n---------------------------------------");
         
             int projectIndex = 0;
-            foreach(Project p in uc.getUser.projects) {
-                Console.WriteLine($"\t{projectIndex + 1}) {p.title}\t\t{p.getTime()}");
-                projectIndex++;
-            }
+            if(uc.getUser.projects.Count > 0)
+                foreach(Project p in uc.getUser.projects) {
+                    Console.WriteLine($"\t{projectIndex + 1}) {p.title}\t\t{p.getTime()}");
+                    projectIndex++;
+                }
             Console.WriteLine($"\n\t{projectIndex + 1}) Create New Project");
             Console.WriteLine($"\t{projectIndex + 2}) Back to Main Menu");
 
@@ -104,7 +103,7 @@ while(true) {
             menuChoice = Console.ReadLine() ?? "";
 
             if(int.Parse(menuChoice) - 1 < uc.getUser.projects.Count) { //OPEN PROJECT
-                Console.Clear();
+            Console.Clear();
 
                 while(true) {
                     Console.WriteLine($"MAIN MENU -> PROJECTS -> {uc.getUser.projects[int.Parse(menuChoice) - 1].title.ToUpper()}");
@@ -112,6 +111,7 @@ while(true) {
                     Console.WriteLine(uc.getUser.projects[int.Parse(menuChoice) - 1].getTime());
                     Console.WriteLine("\n\t1) Start Timer");
                     Console.WriteLine("\n\t2) Back to Projects");
+                    Console.Write("Selection: ");
                     menuChoice = Console.ReadLine() ?? "";
 
                     if(menuChoice.Equals("1")) {
@@ -123,9 +123,7 @@ while(true) {
                         }
                         Console.Clear();
 
-                        bool isDone = false;
                         uint elapsedMillis = 0;
-                        
                         System.Threading.Thread listenForInputThread = new System.Threading.Thread(listenForInput);
                         listenForInputThread.Start();
                         uint lastDigit = 10;
@@ -137,7 +135,7 @@ while(true) {
                                 Console.Clear();
                                 Console.WriteLine("Press 's' to stop the timer...\n");
                                 Console.WriteLine($"Total time spent on {uc.getUser.projects[int.Parse(menuChoice) - 1].title}");
-                                Console.WriteLine($"\t{uc.getUser.projects[int.Parse(menuChoice) - 1].getTime(0, elapsedMillis)}\n");
+                                Console.WriteLine($"\t{uc.getUser.projects[int.Parse(menuChoice) - 1].getTime(-1, elapsedMillis)}\n");
                                 Console.WriteLine("Current Session:");
                                 string currentSession = uc.getUser.projects[int.Parse(menuChoice) - 1].getTime(elapsedMillis, 0);
                                 Console.WriteLine($"({currentSession})");
@@ -146,8 +144,18 @@ while(true) {
                             System.Threading.Thread.Sleep(100);
                         }
 
+                        uc.getPC.modifyProject(
+                            uc.getUser.projects[int.Parse(menuChoice) - 1].title,
+                            uc.getUser.projects[int.Parse(menuChoice) - 1].description,
+                            uc.getUser.projects[int.Parse(menuChoice) - 1].millisecondsTotal + elapsedMillis,
+                            uc.getUser.Id
+                        );
+                        uc.getUser.projects[int.Parse(menuChoice) - 1].millisecondsTotal = uc.getUser.projects[int.Parse(menuChoice) - 1].millisecondsTotal + elapsedMillis;
 
-
+                        Console.Clear();
+                        Console.WriteLine("Session Ended!");
+                        Console.WriteLine($"Details:\n\tTime spent this session: {uc.getUser.projects[int.Parse(menuChoice) - 1].getTime(elapsedMillis, 0)}");
+                        Console.WriteLine($"\tTime spent total: {uc.getUser.projects[int.Parse(menuChoice) - 1].getTime(-1, elapsedMillis)}\n");
                     } else if(menuChoice.Equals("2")) {
                         Console.Clear();
                         break;
@@ -155,7 +163,6 @@ while(true) {
                         printError($"{menuChoice} was not a valid input.  Enter the corresponding number next to each option...");
                     }
                 }
-                Console.WriteLine("Referenced Project:\n\n" + uc.getUser.projects[int.Parse(menuChoice) - 1].ToString() + "\n");
             } else if(int.Parse(menuChoice) == projectIndex + 1) { //CREATE NEW PROJECT
                 Console.Clear();
                 while(true) {
@@ -204,15 +211,14 @@ while(true) {
                 printError($"{menuChoice} wasn't recognized... Enter a corresponding number.");
             }
         }
-
-        
     } else if(menuChoice.Equals("2")) { //SETTINGS
         Console.Clear();
 
         while(true) {
             Console.WriteLine("MAIN MENU -> SETTINGS\n---------------------------------------");
             Console.WriteLine("\t1) Edit User Profile\n");
-            Console.WriteLine("\t2) Back to Main Menu");
+            Console.WriteLine("\t2) Project Settings");
+            Console.WriteLine("\n\t3) Back to Main Menu");
             Console.Write("\nSelection: ");
             menuChoice = Console.ReadLine() ?? "";
             if(menuChoice.Equals("1")) { //USER SETTINGS
@@ -270,7 +276,130 @@ while(true) {
                         printError($"Did not recognize '{menuChoice}'.  Type a digit corresponding to the action you want to take...");
                     }
                 }
-            } else if(menuChoice.Equals("2")) {
+            } else if(menuChoice.Equals("2")) { //PROJECT SETTINGS
+                Console.Clear();
+
+                while(true) {
+                    Console.WriteLine("MAIN MENU -> SETTINGS -> PROJECT SETTINGS\n---------------------------------------");
+                    if(uc.getUser.projects.Count == 0) {
+                        Console.WriteLine("It doesn't seem you have any projects to modify...\n");
+                        break;
+                    }
+
+                    int projectIndex = 0;
+                    foreach(Project p in uc.getUser.projects) {
+                        Console.WriteLine($"\t{projectIndex + 1}) {p.title}\t\t{p.getTime()}");
+                        projectIndex++;
+                    }
+                    Console.WriteLine($"\n\t{projectIndex + 1}) Back to Main Menu");
+
+                    Console.Write("Selection: ");
+                    menuChoice = Console.ReadLine() ?? "";
+
+                    if(int.Parse(menuChoice) - 1 < uc.getUser.projects.Count) { //Edit Project
+                        int referencedProjectNumber = int.Parse(menuChoice) - 1;
+                        Console.Clear();
+
+                        while(true) {
+                            Console.WriteLine($"MAIN MENU -> SETTINGS -> PROJECT SETTINGS -> MODIFY {uc.getUser.projects[referencedProjectNumber].title.ToUpper()}\n---------------------------------------");
+                            Console.WriteLine("\t1) Change Title");
+                            Console.WriteLine("\t2) Change Description");
+                            Console.WriteLine("\t3) Change Time");
+                            Console.WriteLine("\n\t4)Back to Project Settings");
+
+                            Console.Write("\nSelection: ");
+                            menuChoice = Console.ReadLine() ?? "";
+
+                            if(menuChoice.Equals("1")) { //Edit Title
+                                Console.Clear();
+
+                                while(true) {
+                                    Console.WriteLine($"Current title: {uc.getUser.projects[referencedProjectNumber].title}");
+                                    Console.Write("New Title: ");
+                                    string newTitle = Console.ReadLine() ?? "";
+
+                                    if(newTitle == "") {
+                                    printError("Title cannot be blank!");
+                                        continue;
+                                    }
+                                    
+                                    //check if title is already in use
+                                    bool isTitleCopied = false;
+                                    foreach(Project p in uc.getUser.projects) {
+                                        if(p.title == newTitle) {
+                                            printError($"{newTitle} is already being used.  Pick another name!");
+                                            isTitleCopied = true;
+                                            break;
+                                        }
+                                    }
+                                    if(isTitleCopied) continue;
+
+                                    if(newTitle.Length >= 50) {
+                                        printError("Your title cannot be greater than 50 characters...");
+                                        continue;
+                                    }
+
+                                    uc.getPC.modifyProject(uc.getUser.projects[referencedProjectNumber].title, uc.getUser.projects[referencedProjectNumber].description, uc.getUser.projects[int.Parse(menuChoice) - 1].millisecondsTotal, uc.getUser.Id, newTitle);
+                                    uc.getUser.projects[referencedProjectNumber].title = newTitle;
+                                    break;
+                                }
+                            } else if(menuChoice.Equals("2")) { //Edit description
+                                Console.Clear();
+
+                                while(true) {
+                                    Console.WriteLine($"Current description:\n\t{uc.getUser.projects[referencedProjectNumber].description}\n");
+                                    Console.Write("New Description:\n\t");
+                                    string newDescription = Console.ReadLine() ?? ""; 
+
+                                    if(newDescription.Length >= 250) {
+                                        printError("Your description cannot be greater than 250 characters...");
+                                        continue;
+                                    }
+
+                                    uc.getPC.modifyProject(uc.getUser.projects[referencedProjectNumber].title, newDescription, uc.getUser.projects[referencedProjectNumber].millisecondsTotal, uc.getUser.Id);
+                                    uc.getUser.projects[referencedProjectNumber].description = newDescription;
+                                    break;
+                                }
+                            } else if(menuChoice.Equals("3")) { //Edit time
+                                Console.Clear();
+
+                                while(true) {
+                                    long newMillis = 0;
+                                    Console.WriteLine($"Current Time: {uc.getUser.projects[referencedProjectNumber].getTime()}");
+                                    Console.WriteLine("*If you would like to skip a field, type 0 and then hit enter. Otherwise, enter a number*");
+
+                                    Console.Write("Years: ");
+                                    newMillis += int.Parse(Console.ReadLine() ?? "0") * 1000 * 60 * 60 * 24 * 365;
+
+                                    Console.Write("Days: ");
+                                    newMillis += int.Parse(Console.ReadLine() ?? "0") * 1000 * 60 * 60 * 24;
+
+                                    Console.Write("Hours: ");
+                                    newMillis += int.Parse(Console.ReadLine() ?? "0") * 1000 * 60 * 60;
+
+                                    Console.Write("Minutes: ");
+                                    newMillis += int.Parse(Console.ReadLine() ?? "0") * 1000 * 60;
+
+                                    Console.Write("Seconds: ");
+                                    newMillis += int.Parse(Console.ReadLine() ?? "0") * 1000;
+
+                                    uc.getPC.modifyProject(uc.getUser.projects[referencedProjectNumber].title, uc.getUser.projects[referencedProjectNumber].description, newMillis, uc.getUser.Id);
+                                    uc.getUser.projects[referencedProjectNumber].millisecondsTotal = newMillis;
+                                    break;
+                                }
+                            } else if(menuChoice.Equals("4")) {
+                                break;
+                            } else {
+                                printError($"Did not recognize {menuChoice}...");
+                            }
+                        }
+                    } else if(menuChoice.Equals((projectIndex + 1).ToString())) {
+                        break;
+                    } else {
+                        printError($"Didn't recognize {menuChoice}...");
+                    }
+                }
+            } else if(menuChoice.Equals("3")) {
                 break;
             } else {
                 correctInput = false;

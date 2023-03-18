@@ -65,17 +65,18 @@ class ProjectController {
         }
     }
 
-    public void modifyProject(string a_title, string a_description, long a_millisecondsTotal, int a_userID) {
+    public void modifyProject(string a_title, string a_description, long a_millisecondsTotal, int a_userID, string a_newTitle = "") {
         try {
             using(SqlConnection connection = new SqlConnection()) {
                 connection.ConnectionString = "Server=.\\SQLExpress;Database=ChronoKeep;Trusted_Connection=true";
                 connection.Open();
 
-                using(SqlCommand modifyCmd = new SqlCommand("UPDATE Project SET title = @0, description = @1, millisecondsTotal = @2 WHERE title = @0, userID = @4", connection)) {
-                    modifyCmd.Parameters.AddWithValue("@0", a_title);
+                using(SqlCommand modifyCmd = new SqlCommand("UPDATE Project SET title = @0, description = @1, millisecondsTotal = @2 WHERE title = @3 AND userID = @4", connection)) {
+                    modifyCmd.Parameters.AddWithValue("@0", (a_newTitle == "") ? a_title : a_newTitle); //blank new title means title stays the same.
                     modifyCmd.Parameters.AddWithValue("@1", a_description);
                     modifyCmd.Parameters.AddWithValue("@2", a_millisecondsTotal);
-                    modifyCmd.Parameters.AddWithValue("@3", a_userID);
+                    modifyCmd.Parameters.AddWithValue("@3", a_title);
+                    modifyCmd.Parameters.AddWithValue("@4", a_userID);
 
                     modifyCmd.ExecuteNonQuery();
                 }
