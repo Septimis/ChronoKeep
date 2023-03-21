@@ -105,10 +105,13 @@ while(true) {
             if(int.Parse(menuChoice) - 1 < uc.getUser.projects.Count) { //OPEN PROJECT
             Console.Clear();
 
+            Project selectedProj = uc.getUser.projects[int.Parse(menuChoice) - 1];
+            int projNum = int.Parse(menuChoice) - 1;
+
                 while(true) {
-                    Console.WriteLine($"MAIN MENU -> PROJECTS -> {uc.getUser.projects[int.Parse(menuChoice) - 1].title.ToUpper()}");
-                    Console.WriteLine(uc.getUser.projects[int.Parse(menuChoice) - 1].description);
-                    Console.WriteLine(uc.getUser.projects[int.Parse(menuChoice) - 1].getTime());
+                    Console.WriteLine($"MAIN MENU -> PROJECTS -> {selectedProj.title.ToUpper()}");
+                    Console.WriteLine(selectedProj.description);
+                    Console.WriteLine(selectedProj.getTime());
                     Console.WriteLine("\n\t1) Start Timer");
                     Console.WriteLine("\n\t2) Back to Projects");
                     Console.Write("Selection: ");
@@ -134,10 +137,10 @@ while(true) {
                                 lastDigit = (uint)(Math.Floor(elapsedMillis / 1000.0) % 10);
                                 Console.Clear();
                                 Console.WriteLine("Press 's' to stop the timer...\n");
-                                Console.WriteLine($"Total time spent on {uc.getUser.projects[int.Parse(menuChoice) - 1].title}");
-                                Console.WriteLine($"\t{uc.getUser.projects[int.Parse(menuChoice) - 1].getTime(-1, elapsedMillis)}\n");
+                                Console.WriteLine($"Total time spent on {selectedProj.title}");
+                                Console.WriteLine($"\t{selectedProj.getTime(-1, elapsedMillis)}\n");
                                 Console.WriteLine("Current Session:");
-                                string currentSession = uc.getUser.projects[int.Parse(menuChoice) - 1].getTime(elapsedMillis, 0);
+                                string currentSession = selectedProj.getTime(elapsedMillis, 0);
                                 Console.WriteLine($"({currentSession})");
                                 Console.WriteLine(Figgle.FiggleFonts.Standard.Render(currentSession));
                             }
@@ -145,17 +148,17 @@ while(true) {
                         }
 
                         uc.getPC.modifyProject(
-                            uc.getUser.projects[int.Parse(menuChoice) - 1].title,
-                            uc.getUser.projects[int.Parse(menuChoice) - 1].description,
-                            uc.getUser.projects[int.Parse(menuChoice) - 1].millisecondsTotal + elapsedMillis,
+                            uc.getUser.projects[projNum].title,
+                            uc.getUser.projects[projNum].description,
+                            uc.getUser.projects[projNum].millisecondsTotal + elapsedMillis,
                             uc.getUser.Id
                         );
-                        uc.getUser.projects[int.Parse(menuChoice) - 1].millisecondsTotal = uc.getUser.projects[int.Parse(menuChoice) - 1].millisecondsTotal + elapsedMillis;
+                        uc.getUser.projects[projNum].millisecondsTotal = uc.getUser.projects[projNum].millisecondsTotal + elapsedMillis;
 
                         Console.Clear();
                         Console.WriteLine("Session Ended!");
-                        Console.WriteLine($"Details:\n\tTime spent this session: {uc.getUser.projects[int.Parse(menuChoice) - 1].getTime(elapsedMillis, 0)}");
-                        Console.WriteLine($"\tTime spent total: {uc.getUser.projects[int.Parse(menuChoice) - 1].getTime(-1, elapsedMillis)}\n");
+                        Console.WriteLine($"Details:\n\tTime spent this session: {uc.getUser.projects[projNum].getTime(elapsedMillis, 0)}");
+                        Console.WriteLine($"\tTime spent total: {uc.getUser.projects[projNum].getTime(-1, elapsedMillis)}\n");
                     } else if(menuChoice.Equals("2")) {
                         Console.Clear();
                         break;
