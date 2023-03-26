@@ -170,12 +170,14 @@ while(true) {
                 Console.Clear();
                 while(true) {
                     Console.WriteLine("MAIN MENU -> PROJECTS -> CREATE NEW PROJECT\n---------------------------------------");
+                    Console.WriteLine("Or press 'b' to go back to Projects...");
                     Console.Write("Project Title: ");
                     string projTitle = Console.ReadLine() ?? "";
                     if(projTitle == "") {
                         printError("Title cannot be blank!");
                         continue;
                     }
+                    if(projTitle.ToLower().Equals("b")) break;
                     
                     //check if title is already in use
                     bool isTitleCopied = false;
@@ -237,9 +239,14 @@ while(true) {
                     menuChoice = Console.ReadLine() ?? "";
                     
                     if(menuChoice.Equals("1")) { //name
+                        Console.WriteLine("Type 'b' to go back to Settings...");
                         Console.WriteLine($"\nCurrent name: {uc.getUser.name}");
                         Console.Write("\tNew Name: ");
                         string newName = Console.ReadLine() ?? "";
+                        if(newName.ToLower().Equals("b")) {
+                            Console.WriteLine("\nName was not changed...\n");
+                            continue;
+                        }
                         if (newName.Length < 50 && newName.Length > -1 && newName != null) {
                             uc.modifyUser(newName, uc.getUser.Email, uc.getUser.Password);
                             Console.WriteLine($"\nName successfully changed to {uc.getUser.name}!\n");
@@ -247,9 +254,14 @@ while(true) {
                             printError($"{newName} was invalid! Be sure name is between 0 and 50 characters...");
                         }
                     } else if(menuChoice.Equals("2")) { //email
+                        Console.WriteLine("Type 'b' to go back to Settings...");
                         Console.WriteLine($"\nCurrent email: {uc.getUser.Email}");
                         Console.Write("\tNew email: ");
                         string newEmail = Console.ReadLine() ?? "";
+                        if(newEmail.ToLower().Equals("b")) {
+                            Console.WriteLine("\nEmail was not changed...\n");
+                            continue;
+                        }
                         Regex emailRegex = new Regex("^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$");
                         if(emailRegex.IsMatch(newEmail)) {
                             uc.modifyUser(uc.getUser.name, newEmail, uc.getUser.Password);
@@ -258,13 +270,22 @@ while(true) {
                             printError($"{newEmail} was invalid!  Email not changed...");
                         }
                     } else if(menuChoice.Equals("3")) { //password
+                        Console.WriteLine("Type 'b' to go back to Settings...");
                         Console.Write("\nEnter current password: ");
                         string currPlainTextPassword = Console.ReadLine() ?? "";
+                        if(currPlainTextPassword.ToLower().Equals("b")) {
+                            Console.WriteLine("\nPassword was not changed...\n");
+                            continue;
+                        }
                         if(!uc.getUser.Password.Equals(uc.getUser.hashPassword(currPlainTextPassword))) {
                             printError("Password Incorrect!  Password not changed...");
                         } else {
                             Console.Write("\nNew Password: ");
                             string newPlainTextPassword = Console.ReadLine() ?? "";
+                            if(newPlainTextPassword.ToLower().Equals("b")) {
+                                Console.WriteLine("\nPassword was not changed...\n");
+                                continue;
+                            }
                             if(newPlainTextPassword.Length > 7 && newPlainTextPassword != "password") {
                                 uc.modifyUser(uc.getUser.name, uc.getUser.Email, uc.getUser.hashPassword(newPlainTextPassword));
                                 Console.WriteLine("\nPassword successfully changed!");
@@ -317,9 +338,14 @@ while(true) {
                                 Console.Clear();
 
                                 while(true) {
+                                    Console.WriteLine($"Type 'b' to go back to modifying {uc.getUser.projects[referencedProjectNumber].title}");
                                     Console.WriteLine($"Current title: {uc.getUser.projects[referencedProjectNumber].title}");
                                     Console.Write("New Title: ");
                                     string newTitle = Console.ReadLine() ?? "";
+                                    if(newTitle.ToLower().Equals("b")) {
+                                        Console.WriteLine($"\n{uc.getUser.projects[referencedProjectNumber].title} was not modified...\n");
+                                        break;
+                                    }
 
                                     if(newTitle == "") {
                                     printError("Title cannot be blank!");
@@ -350,9 +376,14 @@ while(true) {
                                 Console.Clear();
 
                                 while(true) {
+                                    Console.WriteLine($"Type 'b' to go back to modifying {uc.getUser.projects[referencedProjectNumber].title}");
                                     Console.WriteLine($"Current description:\n\t{uc.getUser.projects[referencedProjectNumber].description}\n");
                                     Console.Write("New Description:\n\t");
-                                    string newDescription = Console.ReadLine() ?? ""; 
+                                    string newDescription = Console.ReadLine() ?? "";
+                                    if(newDescription.ToLower().Equals("b")) {
+                                        Console.WriteLine("\nDescription was not modified...\n");
+                                        break;
+                                    }
 
                                     if(newDescription.Length >= 250) {
                                         printError("Your description cannot be greater than 250 characters...");
@@ -368,23 +399,49 @@ while(true) {
 
                                 while(true) {
                                     long newMillis = 0;
+                                    Console.WriteLine("Type 'b' if you want to stop editing the time...");
                                     Console.WriteLine($"Current Time: {uc.getUser.projects[referencedProjectNumber].getTime()}");
                                     Console.WriteLine("*If you would like to skip a field, type 0 and then hit enter. Otherwise, enter a number*");
 
                                     Console.Write("Years: ");
-                                    newMillis += int.Parse(Console.ReadLine() ?? "0") * 1000 * 60 * 60 * 24 * 365;
+                                    string tmp = Console.ReadLine() ?? "";
+                                    if(tmp.ToLower().Equals("b")) {
+                                        Console.WriteLine("\nTime was not changed...\n");
+                                        break;
+                                    }
+                                    newMillis += int.Parse(tmp) * 1000 * 60 * 60 * 24 * 365;
 
                                     Console.Write("Days: ");
-                                    newMillis += int.Parse(Console.ReadLine() ?? "0") * 1000 * 60 * 60 * 24;
+                                    tmp = Console.ReadLine() ?? "";
+                                    if(tmp.ToLower().Equals("b")) {
+                                        Console.WriteLine("\nTime was not changed...\n");
+                                        break;
+                                    }
+                                    newMillis += int.Parse(tmp) * 1000 * 60 * 60 * 24;
 
                                     Console.Write("Hours: ");
-                                    newMillis += int.Parse(Console.ReadLine() ?? "0") * 1000 * 60 * 60;
+                                    tmp = Console.ReadLine() ?? "";
+                                    if(tmp.ToLower().Equals("b")) {
+                                        Console.WriteLine("\nTime was not changed...\n");
+                                        break;
+                                    }
+                                    newMillis += int.Parse(tmp) * 1000 * 60 * 60;
 
                                     Console.Write("Minutes: ");
-                                    newMillis += int.Parse(Console.ReadLine() ?? "0") * 1000 * 60;
+                                    tmp = Console.ReadLine() ?? "";
+                                    if(tmp.ToLower().Equals("b")) {
+                                        Console.WriteLine("\nTime was not changed...\n");
+                                        break;
+                                    }
+                                    newMillis += int.Parse(tmp) * 1000 * 60;
 
                                     Console.Write("Seconds: ");
-                                    newMillis += int.Parse(Console.ReadLine() ?? "0") * 1000;
+                                    tmp = Console.ReadLine() ?? "";
+                                    if(tmp.ToLower().Equals("b")) {
+                                        Console.WriteLine("\nTime was not changed...\n");
+                                        break;
+                                    }
+                                    newMillis += int.Parse(tmp) * 1000;
 
                                     uc.getPC.modifyProject(uc.getUser.projects[referencedProjectNumber].title, uc.getUser.projects[referencedProjectNumber].description, newMillis, uc.getUser.Id);
                                     uc.getUser.projects[referencedProjectNumber].millisecondsTotal = newMillis;
